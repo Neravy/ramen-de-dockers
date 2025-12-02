@@ -4,8 +4,8 @@ metadata:
   name: contratos-secret
 type: Opaque
 stringData:
-  username: perripopo # <-- USUARIO ACTUALIZADO
-  password: perripopo # <-- CONTRASEÑA DÉBIL (¡Actualizar luego!)
+  username: arelyxl # <-- USUARIO ACTUALIZADO
+  password: Elmomer@123_XD:3 # <-- CONTRASEÑA DÉBIL (¡Actualizar luego!)
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -20,7 +20,7 @@ spec:
   bootstrap:
     initdb:
       database: sys-gen-contracts # <-- DB ACTUALIZADA
-      owner: perripopo # <-- OWNER ACTUALIZADO
+      owner: arelyxl # <-- OWNER ACTUALIZADO
       secret:
         name: contratos-secret
   postgresql:
