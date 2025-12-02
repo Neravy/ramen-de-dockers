@@ -1,12 +1,27 @@
+# Guarda este contenido en un archivo llamado cnpg-cluster-final.yaml
+
+# 1. SECRET para el OWNER (perripopo)
+# Este usuario es el 'superuser' y propietario de la DB 'sys-gen-contracts'
 apiVersion: v1
 kind: Secret
 metadata:
-  name: contratos-secret
+  name: perripopo-owner-secret
 type: Opaque
 stringData:
-  username: arelyxl # <-- USUARIO ACTUALIZADO
-  password: Elmomer@123_XD:3 # <-- CONTRASEÑA DÉBIL (¡Actualizar luego!)
+  username: perripopo
+  password: perripopo # <-- Contraseña del OWNER
 ---
+# 2. SECRET para el NUEVO USUARIO (arelyxl)
+# Este usuario será un usuario estándar de PostgreSQL.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: arelyxl-user-secret
+type: Opaque
+stringData:
+  password: elmomero123 # <-- CONTRASENA PARA arelyxl (¡Cámbiala!)
+---
+# 3. CLUSTER con 20Gi, HA, y Múltiples Usuarios
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -15,14 +30,24 @@ spec:
   instances: 2
   imageName: ghcr.io/cloudnative-pg/postgresql:16.1
   storage:
-    size: 20Gi # <-- TAMAÑO ACTUALIZADO
+    size: 20Gi # <-- Almacenamiento actualizado
     storageClass: local-path
+  
+  # CONFIGURACIÓN DEL OWNER (perripopo) - Se usa para el bootstrap
   bootstrap:
     initdb:
-      database: sys-gen-contracts # <-- DB ACTUALIZADA
-      owner: arelyxl # <-- OWNER ACTUALIZADO
+      database: sys-gen-contracts # <-- Nombre de la DB
+      owner: perripopo
       secret:
-        name: contratos-secret
+        name: perripopo-owner-secret # Referencia a las credenciales del owner
+  
+  # CONFIGURACIÓN DE USUARIOS ADICIONALES (arelyxl)
+  users:
+    - name: arelyxl # <-- El nombre de usuario en PostgreSQL
+      secret:
+        name: arelyxl-user-secret # Referencia al Secret con su contraseña
+      databases: [sys-gen-contracts] # Opcional, pero buena práctica
+  
   postgresql:
     parameters:
       shared_preload_libraries: 'pg_stat_statements'
