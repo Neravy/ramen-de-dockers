@@ -10,12 +10,10 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:18
   affinity:
     podAntiAffinityType: preferred
-  podTemplate:
-    spec:
-      tolerations:
-      - key: node-role.kubernetes.io/control-plane
-        operator: Exists
-        effect: NoSchedule
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
   storage:
     size: 20Gi
     storageClass: local-path
