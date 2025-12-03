@@ -17,3 +17,9 @@ spec:
       owner: perripopo
       secret:
         name: perripopo-owner-secret
+  template:
+    spec:
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"

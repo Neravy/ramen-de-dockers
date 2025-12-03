@@ -42,3 +42,35 @@ containers:
 kubectl delete pod -l k8s-app=kube-dns -n kube-system
 
 aplicar los 3 codigos .yml
+
+# Definimos las variables
+ARCHIVO_LOCAL="/opt/repos/ramen-de-dockers/03-infrastructure/postgresql/kubernets/nuevo_dump_sys_gen_contracts.sql"
+ARCHIVO_REMOTO="/var/lib/postgresql/data/db_restore_plano.sql"
+PRIMARY_POD="contratos-db-cluster-1"
+
+echo "Copiando y restaurando el backup plano en PG 18..."
+
+# 2.1 Copiar el archivo al nuevo Pod Primario
+kubectl cp ${ARCHIVO_LOCAL} ${PRIMARY_POD}:${ARCHIVO_REMOTO} -c postgres
+
+# 2.2 Restaurar los datos (Usando -U postgres para permisos de superusuario)
+# El dump ya contiene la creación de tablas, etc.
+kubectl exec -it ${PRIMARY_POD} -c postgres -- \
+  psql -U postgres -d sys-gen-contracts -f ${ARCHIVO_REMOTO}
+
+# 2.3 Limpiar
+echo "Limpiando archivo temporal..."
+kubectl exec ${PRIMARY_POD} -c postgres -- rm -f ${ARCHIVO_REMOTO}
+
+echo "🎉 ¡Base de datos PostgreSQL 18 con datos restaurados lista!"
+
+Crear el user para psql luego ejecutar esto como buena practica
+
+echo "Cambiando la propiedad de objetos dentro del esquema PUBLIC a perripopo..."
+# Reasignamos la propiedad de todas las tablas/secuencias/vistas dentro del esquema 'public'
+kubectl exec -it contratos-db-cluster-1 -c postgres -- \
+  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO perripopo;"
+kubectl exec -it contratos-db-cluster-1 -c postgres -- \
+  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO perripopo;"
+kubectl exec -it contratos-db-cluster-1 -c postgres -- \
+  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO perripopo;"
