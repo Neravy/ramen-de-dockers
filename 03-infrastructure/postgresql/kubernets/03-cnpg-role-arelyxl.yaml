@@ -2,7 +2,7 @@
 
 # 4. RECURSO ROLE para crear el usuario 'arelyxl'
 # Este recurso le dice a CNPG que cree el usuario en el Cluster.
-apiVersion: postgresql.cnpg.io/v1
+apiVersion: postgresql.cnpg.io/v1beta1
 kind: Role
 metadata:
   name: arelyxl-role

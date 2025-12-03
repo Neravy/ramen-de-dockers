@@ -40,3 +40,5 @@ containers:
         # ... (resto de las variables)
         
 kubectl delete pod -l k8s-app=kube-dns -n kube-system
+
+aplicar los 3 codigos .yml
