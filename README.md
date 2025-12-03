@@ -74,3 +74,22 @@ kubectl exec -it contratos-db-cluster-1 -c postgres -- \
   psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO perripopo;"
 kubectl exec -it contratos-db-cluster-1 -c postgres -- \
   psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO perripopo;"
+  
+  
+perripopo@iuabtw:/opt/repos/ramen-de-dockers/03-infrastructure/postgresql/kubernets$ kubectl patch cluster contratos-db-cluster --type='merge' -p='{
+  "spec": {
+    "affinity": {
+      "tolerations": [
+        {
+          "key": "node-role.kubernetes.io/control-plane",
+          "operator": "Exists",
+          "effect": "NoSchedule"
+        }
+      ]
+    }
+  }
+}'
+cluster.postgresql.cnpg.io/contratos-db-cluster patched
+
+  
+
