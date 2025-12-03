@@ -1,0 +1,16 @@
+# Guarda este contenido en un archivo llamado 03-cnpg-role-arelyxl.yaml
+
+# 4. RECURSO ROLE para crear el usuario 'arelyxl'
+# Este recurso le dice a CNPG que cree el usuario en el Cluster.
+apiVersion: postgresql.cnpg.io/v1
+kind: Role
+metadata:
+  name: arelyxl-role
+spec:
+  cluster:
+    name: contratos-db-cluster # Referencia al Cluster
+  database: sys-gen-contracts # Opcional: Especifica la DB de destino
+  name: arelyxl # Nombre del usuario/role en PostgreSQL
+  secret:
+    name: arelyxl-user-secret # Referencia al Secret con la contraseña
+  # Opcional: Define privilegios si no quieres que tenga acceso total.

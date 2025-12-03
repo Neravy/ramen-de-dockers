@@ -1,0 +1,22 @@
+# Guarda este contenido en un archivo llamado 02-cnpg-cluster.yaml
+
+# 3. CLUSTER con 20Gi, HA, SIN el campo 'users'
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: contratos-db-cluster
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.1
+  storage:
+    size: 20Gi
+    storageClass: local-path
+  bootstrap:
+    initdb:
+      database: sys-gen-contracts
+      owner: perripopo
+      secret:
+        name: perripopo-owner-secret
+  postgresql:
+    parameters:
+      shared_preload_libraries: 'pg_stat_statements'
