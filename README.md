@@ -43,6 +43,16 @@ kubectl delete pod -l k8s-app=kube-dns -n kube-system
 
 aplicar los 3 codigos .yml
 
+
+perripopo@iuabtw:/opt/repos/ramen-de-dockers/03-infrastructure/postgresql/kubernets$ echo "Creando usuario arelyxl y otorgando privilegios..."
+# Usaremos la contraseña 'elmomero123'
+kubectl exec -it contratos-db-cluster-1 -c postgres -- \
+  psql -U postgres -d sys-gen-contracts -c "CREATE USER arelyxl WITH PASSWORD 'elmomero123';"
+
+                                     ^
+command terminated with exit code 1
+
+
 # Definimos las variables
 ARCHIVO_LOCAL="/opt/repos/ramen-de-dockers/03-infrastructure/postgresql/kubernets/nuevo_dump_sys_gen_contracts.sql"
 ARCHIVO_REMOTO="/var/lib/postgresql/data/db_restore_plano.sql"
@@ -66,14 +76,19 @@ echo "🎉 ¡Base de datos PostgreSQL 18 con datos restaurados lista!"
 
 Crear el user para psql luego ejecutar esto como buena practica
 
+echo "Otorgando permisos de conexión a 'sys-gen-contracts'..."
+kubectl exec -it contratos-db-cluster-1 -c postgres -- \
+  psql -U postgres -c "GRANT CONNECT ON DATABASE \"sys-gen-contracts\" TO arelyxl;"
+
+
 echo "Cambiando la propiedad de objetos dentro del esquema PUBLIC a perripopo..."
 # Reasignamos la propiedad de todas las tablas/secuencias/vistas dentro del esquema 'public'
 kubectl exec -it contratos-db-cluster-1 -c postgres -- \
-  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO perripopo;"
+  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO arelyxl;"
 kubectl exec -it contratos-db-cluster-1 -c postgres -- \
-  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO perripopo;"
+  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO arelyxl;"
 kubectl exec -it contratos-db-cluster-1 -c postgres -- \
-  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO perripopo;"
+  psql -U postgres -d sys-gen-contracts -c "GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO arelyxl;"
   
   
 perripopo@iuabtw:/opt/repos/ramen-de-dockers/03-infrastructure/postgresql/kubernets$ kubectl patch cluster contratos-db-cluster --type='merge' -p='{
@@ -91,5 +106,15 @@ perripopo@iuabtw:/opt/repos/ramen-de-dockers/03-infrastructure/postgresql/kubern
 }'
 cluster.postgresql.cnpg.io/contratos-db-cluster patched
 
+kubectl get pods contratos-db-cluster-1 contratos-db-cluster-2 -o wide  
+
+
+# Ejecuta este comando, reemplazando la contraseña con la que configuraste en tu secreto:
+export PGPASSWORD="elmomero123"
+
+# Luego, conéctate usando la IP del servicio ClusterIP (no el Pod), forzando una conexión TCP:
+kubectl exec -it contratos-db-cluster-1 -c postgres -- \
+  psql -h contratos-db-cluster-rw -U arelyxl -d sys-gen-contracts
+  
   
 
